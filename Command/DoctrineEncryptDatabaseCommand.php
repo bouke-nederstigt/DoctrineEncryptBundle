@@ -43,26 +43,25 @@ class DoctrineEncryptDatabaseCommand extends AbstractCommand
 
         // If encryptor has been set use that encryptor else use default
         if ($input->getArgument('encryptor')) {
-            if (isset($supportedExtensions[$input->getArgument('encryptor')])) {
-                $this->subscriber->setEncryptor($supportedExtensions[$input->getArgument('encryptor')]);
-            } else {
-                if (class_exists($input->getArgument('encryptor'))) {
-                    $this->subscriber->setEncryptor($input->getArgument('encryptor'));
-                } else {
-                    $output->writeln('Given encryptor does not exists');
+            try {
+                $encryptor = $this->encryptorFactory->create($input->getArgument("encryptor"));
+                $this->subscriber->setEncryptor($encryptor);
+            } catch (\Exception $e) {
+                $output->writeln('Given encryptor does not exists');
 
-                    return $output->writeln('Supported encryptors: ' . implode(', ', array_keys($supportedExtensions)));
-                }
+                return $output->writeln('Supported encryptors: '.implode(', ', array_keys($supportedExtensions)));
             }
         }
 
         // Get entity manager metadata
         $metaDataArray = $this->getEncryptionableEntityMetaData();
         $confirmationQuestion = new ConfirmationQuestion(
-            '<question>' . count($metaDataArray) . ' entities found which are containing properties with the encryption tag.' . PHP_EOL . '' .
-            'Which are going to be encrypted with [' . $this->subscriber->getEncryptor() . ']. ' . PHP_EOL . ''.
-            'Wrong settings can mess up your data and it will be unrecoverable. ' . PHP_EOL . '' .
-            'I advise you to make <bg=yellow;options=bold>a backup</bg=yellow;options=bold>. ' . PHP_EOL . '' .
+            '<question>'.count(
+                $metaDataArray
+            ).' entities found which are containing properties with the encryption tag.'.PHP_EOL.''.
+            'Which are going to be encrypted with ['.$this->subscriber->getEncryptor().']. '.PHP_EOL.''.
+            'Wrong settings can mess up your data and it will be unrecoverable. '.PHP_EOL.''.
+            'I advise you to make <bg=yellow;options=bold>a backup</bg=yellow;options=bold>. '.PHP_EOL.''.
             'Continue with this action? (y/yes)</question>', false
         );
 
@@ -71,7 +70,9 @@ class DoctrineEncryptDatabaseCommand extends AbstractCommand
         }
 
         // Start decrypting database
-        $output->writeln('' . PHP_EOL . 'Encrypting all fields can take up to several minutes depending on the database size.');
+        $output->writeln(
+            ''.PHP_EOL.'Encrypting all fields can take up to several minutes depending on the database size.'
+        );
 
         // Loop through entity manager meta data
         foreach ($metaDataArray as $metaData) {
@@ -98,7 +99,9 @@ class DoctrineEncryptDatabaseCommand extends AbstractCommand
         }
 
         // Say it is finished
-        $output->writeln('Encryption finished. Values encrypted: <info>' . $this->subscriber->encryptCounter . ' values</info>.' . PHP_EOL . 'All values are now encrypted.');
+        $output->writeln(
+            'Encryption finished. Values encrypted: <info>'.$this->subscriber->encryptCounter.' values</info>.'.PHP_EOL.'All values are now encrypted.'
+        );
     }
 
 

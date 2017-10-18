@@ -12,18 +12,22 @@ use \ParagonIE\Halite\Symmetric\Crypto;
  *
  * @author Michael de Groot <specamps@gmail.com>
  */
-
 class HaliteEncryptor implements EncryptorInterface
 {
+    protected $encryptionKey;
+    protected $storeInDir;
+    protected $fileName;
+    protected $fullStorePath;
+
     /**
      * {@inheritdoc}
      */
-    public function __construct($oDoctrineEncryptSubscriber)
+    public function __construct($projectRoot)
     {
         $this->encryptionKey = null;
-        $this->storeInDir    = $oDoctrineEncryptSubscriber->projectRoot;
-        $this->fileName      = '.' . (new \ReflectionClass($this))->getShortName() . '.key';
-        $this->fullStorePath = $this->storeInDir . $this->fileName;
+        $this->storeInDir = $projectRoot;
+        $this->fileName = '.'.(new \ReflectionClass($this))->getShortName().'.key';
+        $this->fullStorePath = $this->storeInDir.$this->fileName;
     }
 
     /**
@@ -31,7 +35,7 @@ class HaliteEncryptor implements EncryptorInterface
      */
     public function encrypt($data)
     {
-        return \ParagonIE\Halite\Symmetric\Crypto::encrypt(new HiddenString($data), $this->getKey()) . '<ENC>';
+        return \ParagonIE\Halite\Symmetric\Crypto::encrypt(new HiddenString($data), $this->getKey()).'<ENC>';
     }
 
     /**

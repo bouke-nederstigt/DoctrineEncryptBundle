@@ -45,16 +45,13 @@ class DoctrineDecryptDatabaseCommand extends AbstractCommand
 
         // If encryptor has been set use that encryptor else use default
         if ($input->getArgument('encryptor')) {
-            if (isset($supportedExtensions[$input->getArgument('encryptor')])) {
-                $this->subscriber->setEncryptor($supportedExtensions[$input->getArgument('encryptor')]);
-            } else {
-                if (class_exists($input->getArgument('encryptor'))) {
-                    $this->subscriber->setEncryptor($input->getArgument('encryptor'));
-                } else {
-                    $output->writeln('Given encryptor does not exists');
+            try {
+                $encryptor = $this->encryptorFactory->create($input->getArgument("encryptor"));
+                $this->subscriber->setEncryptor($encryptor);
+            } catch (\Exception $e) {
+                $output->writeln('Given encryptor does not exists');
 
-                    return $output->writeln('Supported encryptors: ' . implode(', ', array_keys($supportedExtensions)));;
-                }
+                return $output->writeln('Supported encryptors: '.implode(', ', array_keys($supportedExtensions)));
             }
         }
 
@@ -73,10 +70,12 @@ class DoctrineDecryptDatabaseCommand extends AbstractCommand
         }
 
         $confirmationQuestion = new ConfirmationQuestion(
-            '<question>' . count($metaDataArray) . ' entities found which are containing ' . $propertyCount . ' properties with the encryption tag. ' . PHP_EOL . '' .
-            'Which are going to be decrypted with [' . $this->subscriber->getEncryptor() . ']. ' . PHP_EOL . '' .
-            'Wrong settings can mess up your data and it will be unrecoverable. ' . PHP_EOL . '' .
-            'I advise you to make <bg=yellow;options=bold>a backup</bg=yellow;options=bold>. ' . PHP_EOL . '' .
+            '<question>'.count(
+                $metaDataArray
+            ).' entities found which are containing '.$propertyCount.' properties with the encryption tag. '.PHP_EOL.''.
+            'Which are going to be decrypted with ['.$this->subscriber->getEncryptor().']. '.PHP_EOL.''.
+            'Wrong settings can mess up your data and it will be unrecoverable. '.PHP_EOL.''.
+            'I advise you to make <bg=yellow;options=bold>a backup</bg=yellow;options=bold>. '.PHP_EOL.''.
             'Continue with this action? (y/yes)</question>', false
         );
 
@@ -85,7 +84,9 @@ class DoctrineDecryptDatabaseCommand extends AbstractCommand
         }
 
         // Start decrypting database
-        $output->writeln('' . PHP_EOL . 'Decrypting all fields. This can take up to several minutes depending on the database size.');
+        $output->writeln(
+            ''.PHP_EOL.'Decrypting all fields. This can take up to several minutes depending on the database size.'
+        );
 
         $valueCounter = 0;
 
@@ -110,8 +111,8 @@ class DoctrineDecryptDatabaseCommand extends AbstractCommand
                 foreach ($this->getEncryptionableProperties($metaData) as $property) {
                     $methodeName = ucfirst($property->getName());
 
-                    $getter = 'get' . $methodeName;
-                    $setter = 'set' . $methodeName;
+                    $getter = 'get'.$methodeName;
+                    $setter = 'set'.$methodeName;
 
                     //Check if getter and setter are set
                     if ($entityReflectionClass->hasMethod($getter) && $entityReflectionClass->hasMethod($setter)) {
@@ -144,6 +145,8 @@ class DoctrineDecryptDatabaseCommand extends AbstractCommand
             $this->subscriber->setEncryptor($encryptorUsed);
         }
 
-        $output->writeln('' . PHP_EOL . 'Decryption finished values found: <info>' . $valueCounter . '</info>, decrypted: <info>' . $this->subscriber->decryptCounter . '</info>.' . PHP_EOL . 'All values are now decrypted.');
+        $output->writeln(
+            ''.PHP_EOL.'Decryption finished values found: <info>'.$valueCounter.'</info>, decrypted: <info>'.$this->subscriber->decryptCounter.'</info>.'.PHP_EOL.'All values are now decrypted.'
+        );
     }
 }

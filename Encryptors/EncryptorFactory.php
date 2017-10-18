@@ -1,0 +1,47 @@
+<?php
+/**
+ * Date: 18/10/17
+ * Time: 10:47
+ */
+
+namespace Ambta\DoctrineEncryptBundle\Encryptors;
+
+
+use Ambta\DoctrineEncryptBundle\Encryptors\EncryptorInterface;
+
+class EncryptorFactory
+{
+    protected $projectRoot;
+
+    /**
+     * EncryptorFactory constructor.
+     */
+    public function __construct()
+    {
+        $this->projectRoot = dirname(
+                __FILE__
+            ).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;;
+    }
+
+    /**
+     * @param $encryptorClass
+     * @return EncryptorInterface
+     */
+    public function create($encryptorClass)
+    {
+        if (class_exists(ucfirst($encryptorClass)) === false) {
+            $encryptorClass = '\\Ambta\\DoctrineEncryptBundle\\Encryptors\\'.ucfirst($encryptorClass).'Encryptor';
+        } else {
+            $encryptorClass = ucfirst($encryptorClass);
+        }
+
+        $encryptor = new $encryptorClass();
+        $interfaces = class_implements($encryptor);
+
+        if (isset($interfaces[EncryptorInterface::class])) {
+            return $encryptor;
+        } else {
+            throw new \RuntimeException('Encryptor must implements interface EncryptorInterface');
+        }
+    }
+}

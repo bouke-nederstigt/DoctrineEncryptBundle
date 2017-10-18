@@ -20,33 +20,34 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 class DoctrineEncryptSubscriber implements EventSubscriber
 {
     /**
-     * Encryptor interface namespace
-     */
-    const ENCRYPTOR_INTERFACE_NS = 'Ambta\DoctrineEncryptBundle\Encryptors\EncryptorInterface';
-    /**
      * Encrypted annotation full name
      */
     const ENCRYPTED_ANN_NAME = 'Ambta\DoctrineEncryptBundle\Configuration\Encrypted';
+
     /**
      * Encryptor
      * @var EncryptorInterface
      */
     private $encryptor;
+
     /**
      * Annotation reader
      * @var \Doctrine\Common\Annotations\Reader
      */
     private $annReader;
+
     /**
      * Used for restoring the encryptor after changing it
      * @var string
      */
     private $restoreEncryptor;
+
     /**
      * Count amount of decrypted values in this service
      * @var integer
      */
     public $decryptCounter = 0;
+
     /**
      * Count amount of encrypted values in this service
      * @var integer
@@ -57,43 +58,25 @@ class DoctrineEncryptSubscriber implements EventSubscriber
      * Initialization of subscriber
      *
      * @param Reader $annReader
-     * @param string $encryptorClass The encryptor class.  This can be empty if a service is being provided.
-     * @param EncryptorInterface|NULL $service (Optional)  An EncryptorInterface.
+     * @param EncryptorInterface $encryptor An EncryptorInterface.
      *
      * This allows for the use of dependency injection for the encrypters.
      */
-    public function __construct(Reader $annReader, $encryptorClass, EncryptorInterface $service = null)
+    public function __construct(Reader $annReader, EncryptorInterface $encryptor)
     {
         $this->annReader = $annReader;
-        $this->projectRoot = dirname(
-                __FILE__
-            ).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;
-        if (class_exists(ucfirst($encryptorClass)) === false) {
-            $encryptorClass = '\\Ambta\\DoctrineEncryptBundle\\Encryptors\\'.ucfirst($encryptorClass).'Encryptor';
-        } else {
-            $encryptorClass = ucfirst($encryptorClass);
-        }
-        if ($service instanceof EncryptorInterface) {
-            $this->encryptor = $service;
-        } else {
-            $this->encryptor = $this->encryptorFactory($encryptorClass);
-        }
+        $this->encryptor = $encryptor;
         $this->restoreEncryptor = $this->encryptor;
     }
 
     /**
      * Change the encryptor
      *
-     * @param $encryptorClass encryptorClass the encryptor class
+     * @param EncryptorInterface $encryptor the encryptor class
      */
-    public function setEncryptor($encryptorClass)
+    public function setEncryptor(EncryptorInterface $encryptor)
     {
-        if (!is_null($encryptorClass)) {
-            $this->encryptor = $this->encryptorFactory($encryptorClass);
-
-            return;
-        }
-        $this->encryptor = null;
+        $this->encryptor = $encryptor;
     }
 
     /**
@@ -265,29 +248,6 @@ class DoctrineEncryptSubscriber implements EventSubscriber
         return null;
     }
 
-    /**
-     * Creates a CSPRNG from paragonie/random_compat
-     *
-     * @param int $length length of bytes
-     *
-     * @return string
-     */
-    public function generateRandomString($length = 256)
-    {
-        try {
-            $string = random_bytes($length);
-        } catch (TypeError $e) {
-            die('An unexpected error has occurred with random_bytes');
-        } catch (Error $e) {
-            die('An unexpected error has occurredwith random_bytes');
-        } catch (Exception $e) {
-            // If you get this message, the CSPRNG failed hard.
-            die('Could not generate a random string. Is our OS secure?');
-        }
-
-        return bin2hex($string);
-    }
-
     private function handleEmbeddedAnnotation($entity, $embeddedProperty, $isEncryptOperation = true)
     {
         $reflectionClass = new ReflectionClass($entity);
@@ -324,23 +284,5 @@ class DoctrineEncryptSubscriber implements EventSubscriber
         }
 
         return $propertiesArray;
-    }
-
-    /**
-     * Encryptor factory. Checks and create needed encryptor
-     *
-     * @param string $classFullName Encryptor namespace and name
-     *
-     * @return EncryptorInterface
-     * @throws \RuntimeException
-     */
-    private function encryptorFactory($classFullName)
-    {
-        $refClass = new \ReflectionClass($classFullName);
-        if ($refClass->implementsInterface(self::ENCRYPTOR_INTERFACE_NS)) {
-            return new $classFullName($this);
-        } else {
-            throw new \RuntimeException('Encryptor must implements interface EncryptorInterface');
-        }
     }
 }

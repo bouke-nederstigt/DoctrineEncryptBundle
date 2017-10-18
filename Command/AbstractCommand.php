@@ -1,6 +1,7 @@
 <?php
 namespace Ambta\DoctrineEncryptBundle\Command;
 
+use Ambta\DoctrineEncryptBundle\Encryptors\EncryptorFactory;
 use Ambta\DoctrineEncryptBundle\Subscribers\DoctrineEncryptSubscriber;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\ORM\EntityManagerInterface;
@@ -31,6 +32,11 @@ abstract class AbstractCommand extends ContainerAwareCommand
     protected $annotationReader;
 
     /**
+     * @var EncryptorFactory
+     */
+    protected $encryptorFactory;
+
+    /**
      * {@inheritdoc}
      */
     protected function initialize(InputInterface $input, OutputInterface $output)
@@ -39,6 +45,7 @@ abstract class AbstractCommand extends ContainerAwareCommand
         $this->entityManager    = $container->get('doctrine.orm.entity_manager');
         $this->annotationReader = $container->get('annotation_reader');
         $this->subscriber       = $container->get('ambta_doctrine_encrypt.subscriber');
+        $this->encryptorFactory = $container->get('ambta_doctrine_encrypt.encryptor_factory');
     }
 
     /**
