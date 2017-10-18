@@ -1,6 +1,6 @@
 <?php
 
-namespace VMelnik\DoctrineEncryptBundle\Configuration;
+namespace Ambta\DoctrineEncryptBundle\Configuration;
 
 /**
  * The Encrypted class handles the @Encrypted annotation.
@@ -8,6 +8,7 @@ namespace VMelnik\DoctrineEncryptBundle\Configuration;
  * @author Victor Melnik <melnikvictorl@gmail.com>
  * @Annotation
  */
-class Encrypted {
-    // some parameters will be added
+class Encrypted
+{
+    // Placeholder
 }

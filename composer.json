@@ -1,22 +1,22 @@
 {
-    "name": "vmelnik/doctrine-encrypt-bundle",
+    "name": "michaeldegroot/doctrine-encrypt-bundle",
     "type": "library",
-    "keywords": ["doctrine", "aes256", "encrypt", "decrypt"],
+    "keywords": ["doctrine", "symfony", "halite", "defuse", "encrypt", "decrypt"],
     "license": "MIT",
-    "description": "Symfony 2 bundle which allows to encrypt data in database with some encrypt algorithm",
+    "description": "Encrypted symfony entity's by verified and standardized libraries",
     "require": {
-        "php": ">=5.3.2",
-        "symfony/framework-bundle": ">=2.0",
-        "ext-mcrypt": "*"
+        "php": ">=5.4",
+        "defuse/php-encryption": "^2.0",
+        "paragonie/random_compat": "^2.0"
     },
     "autoload": {
-        "psr-0": { "VMelnik\\DoctrineEncryptBundle": "" }
+        "psr-0": { "Ambta\\DoctrineEncryptBundle": "" }
     },
-    "target-dir": "VMelnik/DoctrineEncryptBundle",
+    "target-dir": "Ambta/DoctrineEncryptBundle",
     "authors": [
         {
-            "name": "Victor Melnik",
-            "email": "melnikvictorl@gmail.com"
+            "name": "Michael de Groot",
+            "email": "specamps@gmail.com"
         }
     ]
 }
