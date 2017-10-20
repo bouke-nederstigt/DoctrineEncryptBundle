@@ -7,22 +7,8 @@
 namespace Ambta\DoctrineEncryptBundle\Encryptors;
 
 
-use Ambta\DoctrineEncryptBundle\Encryptors\EncryptorInterface;
-
 class EncryptorFactory
 {
-    protected $projectRoot;
-
-    /**
-     * EncryptorFactory constructor.
-     */
-    public function __construct()
-    {
-        $this->projectRoot = dirname(
-                __FILE__
-            ).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;;
-    }
-
     /**
      * @param $encryptorClass
      * @return EncryptorInterface
@@ -35,7 +21,11 @@ class EncryptorFactory
             $encryptorClass = ucfirst($encryptorClass);
         }
 
-        $encryptor = new $encryptorClass();
+        $projectRoot = dirname(
+                __FILE__
+            ).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;;
+
+        $encryptor = new $encryptorClass($projectRoot);
         $interfaces = class_implements($encryptor);
 
         if (isset($interfaces[EncryptorInterface::class])) {

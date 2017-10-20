@@ -8,7 +8,7 @@ services:
         alias: ambta_doctrine_encrypt.orm_subscriber
     ambta_doctrine_encrypt.encryptor:
         class: Ambta\DoctrineEncryptBundle\Encryptors\EncryptorInterface
-        factory_class: Ambta\DoctrineEncryptBundle\Encryptors\EncryptorFactory
-        factory_method: create
+        factory: ['Ambta\DoctrineEncryptBundle\Encryptors\EncryptorFactory', create]
+        arguments: ['%ambta_doctrine_encrypt.encryptor_class_name%']
     ambta_doctrine_encrypt.encryptor.encryptor_factory:
         class: Ambta\DoctrineEncryptBundle\Encryptors\EncryptorFactory
